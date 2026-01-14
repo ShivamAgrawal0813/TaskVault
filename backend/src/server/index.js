@@ -1,17 +1,11 @@
 import dotenv from 'dotenv'
-import mongoose from 'mongoose';
 import { createServer } from 'node:http';
+import connectDB from '../config/db.js';
 
 dotenv.config();
 // console.log("MONGO_URI:", process.env.MONGO_URI);
 // // console.log(process.env);
-try{
-  await mongoose.connect(process.env.MONGO_URI);
-  console.log("Connected to MongoDB");
-}catch(err){
-  console.error("Error Connecting to MongoDB at server start: ",err.message);
-  process.exit(1);
-}
+await connectDB();
 
 const hostname = '127.0.0.1';
 const port = process.env.PORT;
