@@ -101,3 +101,38 @@ export const updateTask = async (req, res) => {
         });
     }
 };
+
+export const deleteTask = async (req, res) => {
+    try{
+
+        const taskId = req.params.id;
+
+        const userId = req.user.userId;
+
+        const deletedTask = await Task.findOneAndDelete({
+            _id : taskId,
+            user : userId
+        });
+
+        if(!deletedTask){
+            return res.status(404).json({
+                success : false,
+                message : "Task not found or access denied"
+            });
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "Task deleted successfully"
+        });
+
+
+    }catch(error){
+        console.error("Delete task error:",error);
+
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server error"
+        });
+    }
+}
