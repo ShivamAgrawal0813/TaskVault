@@ -1,6 +1,7 @@
 import Task from "../models/Task.js";
+import AppError from "../utils/AppError.js";
 
-export const createTask = async (req, res) => {
+export const createTask = async (req, res, next) => {
     try {
 
         const userId = req.user.userId;
@@ -8,10 +9,11 @@ export const createTask = async (req, res) => {
         const {title, status, description} = req.body;
 
         if(!title){
-            return res.status(400).json({
-                success : false,
-                message : "Task title is required"
-            });
+            // return res.status(400).json({
+            //     success : false,
+            //     message : "Task title is required"
+            // });
+            throw new AppError("Task title is required", 400);
         }
 
         const task = await Task.create({
@@ -24,18 +26,14 @@ export const createTask = async (req, res) => {
         return res.status(201).json({
             success : true,
             message : "Task created successfully",
-            task
+            task,
         });
     }catch(error){
-        console.error("Create task error:",error);
-        return res.status(500).json({
-            success : false,
-            message : "Internal server error"
-        });
+        next(error);
     }
 };
 
-export const getTasks = async (req, res) => {
+export const getTasks = async (req, res, next) => {
     try{
 
         const userId = req.user.userId;
@@ -47,19 +45,14 @@ export const getTasks = async (req, res) => {
         return res.status(200).json({
             success : true,
             count : tasks.length,
-            tasks
+            tasks,
         });
     }catch(error){
-        console.error("Fetch tasks error:",error);
-
-        return res.status(500).json({
-            success : false,
-            message : "Internal Server error"
-        });
+        next(error);
     }
 };
 
-export const updateTask = async (req, res) => {
+export const updateTask = async (req, res, next) => {
     try{
 
         const taskId = req.params.id;
@@ -81,28 +74,25 @@ export const updateTask = async (req, res) => {
         );
 
         if(!updatedTask){
-            return res.status(404).json({
-                success : false,
-                message : "Task not found or access denied"
-            });
+            // return res.status(404).json({
+            //     success : false,
+            //     message : "Task not found or access denied"
+            // });
+            throw new AppError("Task not found or access denied", 404);
         }
 
         return res.status(200).json({
             success : true,
             message : "Task updated successfully",
-            task : updateTask
+            task : updatedTask,
         });
 
     }catch(error){
-        console.error("Update task error:",error);
-        return res.status(500).json({
-            success : false,
-            message : "Internal server error"
-        });
+        next(error);
     }
 };
 
-export const deleteTask = async (req, res) => {
+export const deleteTask = async (req, res, next) => {
     try{
 
         const taskId = req.params.id;
@@ -115,10 +105,11 @@ export const deleteTask = async (req, res) => {
         });
 
         if(!deletedTask){
-            return res.status(404).json({
-                success : false,
-                message : "Task not found or access denied"
-            });
+            // return res.status(404).json({
+            //     success : false,
+            //     message : "Task not found or access denied"
+            // });
+            throw new AppError("Task not found or access denied", 404);
         }
 
         return res.status(200).json({
@@ -128,11 +119,6 @@ export const deleteTask = async (req, res) => {
 
 
     }catch(error){
-        console.error("Delete task error:",error);
-
-        return res.status(500).json({
-            success : false,
-            message : "Internal Server error"
-        });
+        next(error);
     }
 }
