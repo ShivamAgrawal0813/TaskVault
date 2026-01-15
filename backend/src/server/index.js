@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 import express from 'express'
 import connectDB from '../config/db.js';
 import authRoutes from "../routes/auth.routes.js";
+import taskRoutes from "../routes/task.routes.js";
 
 dotenv.config();
 // console.log("MONGO_URI:", process.env.MONGO_URI);
@@ -16,6 +17,7 @@ const app = express()
 app.use(express.json());
 
 app.use("/auth", authRoutes);
+app.use("/tasks",taskRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
