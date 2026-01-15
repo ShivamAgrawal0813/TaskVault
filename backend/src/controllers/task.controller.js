@@ -58,3 +58,46 @@ export const getTasks = async (req, res) => {
         });
     }
 };
+
+export const updateTask = async (req, res) => {
+    try{
+
+        const taskId = req.params.id;
+
+        const userId = req.user.userId;
+
+        const {title, status, description} = req.body;
+
+        const updateData = {};
+
+        if(title !== undefined) updateData.title = title;
+        if(status !== undefined) updateData.status = status;
+        if(description !== undefined) updateData.description = description;
+
+        const updatedTask = await Task.findOneAndUpdate(
+            {_id : taskId, user : userId},
+            updateData,
+            {new: true, runValidators:true}
+        );
+
+        if(!updatedTask){
+            return res.status(404).json({
+                success : false,
+                message : "Task not found or access denied"
+            });
+        }
+
+        return res.status(200).json({
+            success : true,
+            message : "Task updated successfully",
+            task : updateTask
+        });
+
+    }catch(error){
+        console.error("Update task error:",error);
+        return res.status(500).json({
+            success : false,
+            message : "Internal server error"
+        });
+    }
+};
