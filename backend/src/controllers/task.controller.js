@@ -34,3 +34,27 @@ export const createTask = async (req, res) => {
         });
     }
 };
+
+export const getTasks = async (req, res) => {
+    try{
+
+        const userId = req.user.userId;
+
+        const tasks = await Task.find({user : userId}).sort({
+            created_at : -1
+        });
+
+        return res.status(200).json({
+            success : true,
+            count : tasks.length,
+            tasks
+        });
+    }catch(error){
+        console.error("Fetch tasks error:",error);
+
+        return res.status(500).json({
+            success : false,
+            message : "Internal Server error"
+        });
+    }
+};
