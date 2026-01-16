@@ -46,18 +46,42 @@ const Register = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validate()) return;
 
         setIsSubmitting(true);
 
-        setTimeout(() => {
-            console.log(formData);
-            setIsSubmitting(false);
+        try {
+
+            const response = await fetch("http://localhost:7000/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Registration failed");
+            }
+
+            alert("Registration successfull! Please login.");
             navigate("/login");
-        }, 1500);
+        } catch (error) {
+
+            setErrors({ general: error.message });
+
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -66,6 +90,12 @@ const Register = () => {
                 <h1 className='text-2xl font-bold text-center mb-6'>
                     Create an account
                 </h1>
+
+                {errors.general && (
+                    <div className="mb-4 text-sm text-red-600 text-center">
+                        {errors.general}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className='space-y-4'>
 

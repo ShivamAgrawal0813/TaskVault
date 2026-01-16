@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { setToken } from "../utils/auth";
 
 const Login = () => {
 
@@ -17,7 +18,7 @@ const Login = () => {
 
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
@@ -40,7 +41,7 @@ const Login = () => {
         return Object.keys(newErrors).length === 0;
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
 
         e.preventDefault();
 
@@ -48,11 +49,35 @@ const Login = () => {
 
         setIsSubmitting(true);
 
-        setTimeout(() => {
-            console.log("Login Data:", formData);
-            setIsSubmitting(false);
+        try {
+
+            const response = await fetch("http://localhost:7000/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Login failed");
+            }
+
+            setToken(data.token);
+
             navigate("/dashboard");
-        }, 1500);
+
+        } catch (error) {
+
+            setErrors({ general: error.message });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -61,6 +86,13 @@ const Login = () => {
                 <h1 className="text-2xl font-bold text-center mb-6">
                     Login to your account
                 </h1>
+
+                {errors.general && (
+                    <div className="mb-4 text-sm text-red-600 text-center">
+                        {errors.general}
+                    </div>
+                )}
+
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -102,8 +134,8 @@ const Login = () => {
                         type="submit"
                         disabled={isSubmitting}
                         className={`w-full py-2 rounded-md text-white transition ${isSubmitting
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-700"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700"
                             }`}
                     >
                         {isSubmitting ? "Logging in..." : "Login"}
