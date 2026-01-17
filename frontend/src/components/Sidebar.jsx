@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 function Sidebar({ isOpen, closeSidebar }) {
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"
@@ -11,7 +10,6 @@ function Sidebar({ isOpen, closeSidebar }) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
           fixed md:static top-0 left-0 h-full
@@ -21,27 +19,24 @@ function Sidebar({ isOpen, closeSidebar }) {
           md:translate-x-0
         `}
       >
-        <nav className="space-y-2 mt-14 md:mt-0">
+        <nav className="mt-14 md:mt-0 space-y-3">
+          <NavLink
+            to="/dashboard/profile"
+            className="block px-3 py-2 rounded hover:bg-gray-200"
+          >
+            Profile
+          </NavLink>
+
           <NavLink
             to="/dashboard"
-            className={({ isActive }) =>
-              `block px-3 py-2 rounded ${
-                isActive ? "bg-blue-600 text-white" : "text-gray-700"
-              }`
-            }
-            onClick={closeSidebar}
+            className="block px-3 py-2 rounded hover:bg-gray-200"
           >
             Dashboard
           </NavLink>
 
           <NavLink
             to="/dashboard/tasks"
-            className={({ isActive }) =>
-              `block px-3 py-2 rounded ${
-                isActive ? "bg-blue-600 text-white" : "text-gray-700"
-              }`
-            }
-            onClick={closeSidebar}
+            className="block px-3 py-2 rounded hover:bg-gray-200"
           >
             Tasks
           </NavLink>
