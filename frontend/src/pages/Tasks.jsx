@@ -14,6 +14,16 @@ function Tasks() {
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState(null);
 
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editData, setEditData] = useState({
+        title: "",
+        description: "",
+        status: "pending",
+    });
+    const [editError, setEditError] = useState(null);
+    const [updating, setUpdating] = useState(false);
+
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -55,6 +65,16 @@ function Tasks() {
 
         fetchTasks();
     }, [navigate]);
+
+    const startEdit = (task) => {
+        setEditingTaskId(task._id);
+        setEditData({
+            title: task.title,
+            description: task.description || "",
+            status: task.status || "pending",
+        });
+        setEditError(null);
+    };
 
     const handleCreateTask = async (e) => {
         e.preventDefault();
@@ -110,6 +130,57 @@ function Tasks() {
             setCreating(false);
         }
     };
+
+    const handleUpdateTask = async (taskId) => {
+        setUpdating(true);
+        setEditError(null);
+
+        try {
+            const token = getToken();
+            if (!token) {
+                clearToken();
+                navigate("/login");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:7000/tasks/${taskId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(editData),
+                }
+            );
+
+            if (response.status === 401) {
+                clearToken();
+                navigate("/login");
+                return;
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to update task");
+            }
+
+            setTasks((prev) =>
+                prev.map((task) =>
+                    task._id === taskId ? data.task : task
+                )
+            );
+
+            setEditingTaskId(null);
+        } catch (err) {
+            setEditError(err.message);
+        } finally {
+            setUpdating(false);
+        }
+    };
+
 
     if (loading) {
         return <p className="text-gray-600">Loading tasks...</p>;
@@ -173,28 +244,94 @@ function Tasks() {
                 <p>No tasks yet. Create one!</p>
             ) : (<div className="space-y-3">
                 {tasks.map((task) => (
-                    <div
-                        key={task._id}
-                        className="border p-4 rounded flex justify-between"
-                    >
-                        <div>
-                            <h3 className="font-semibold">{task.title}</h3>
-                            <p className="text-sm text-gray-600">
-                                Status: {task.status || "pending"}
-                            </p>
-                            {task.description && (
-                                <p className="text-sm text-gray-500 mt-1">
-                                    {task.description}
-                                </p>
-                            )}
-                        </div>
+                    <div key={task._id} className="border p-4 rounded">
+                        {editingTaskId === task._id ? (
+                            /* 🔹 EDIT MODE */
+                            <div className="space-y-2">
+                                <input
+                                    value={editData.title}
+                                    onChange={(e) =>
+                                        setEditData((prev) => ({ ...prev, title: e.target.value }))
+                                    }
+                                    className="border px-2 py-1 rounded w-full"
+                                />
 
-                        <div className="space-x-2">
-                            <button className="text-blue-600">Edit</button>
-                            <button className="text-red-600">Delete</button>
-                        </div>
+                                <textarea
+                                    value={editData.description}
+                                    onChange={(e) =>
+                                        setEditData((prev) => ({
+                                            ...prev,
+                                            description: e.target.value,
+                                        }))
+                                    }
+                                    className="border px-2 py-1 rounded w-full"
+                                />
+
+                                <select
+                                    value={editData.status}
+                                    onChange={(e) =>
+                                        setEditData((prev) => ({
+                                            ...prev,
+                                            status: e.target.value,
+                                        }))
+                                    }
+                                    className="border px-2 py-1 rounded w-full"
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+
+                                {editError && (
+                                    <p className="text-sm text-red-600">{editError}</p>
+                                )}
+
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleUpdateTask(task._id)}
+                                        disabled={updating}
+                                        className="bg-green-600 text-white px-3 py-1 rounded"
+                                    >
+                                        {updating ? "Saving..." : "Save"}
+                                    </button>
+
+                                    <button
+                                        onClick={() => setEditingTaskId(null)}
+                                        className="text-gray-600"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            /* 🔹 VIEW MODE */
+                            <div className="flex justify-between">
+                                <div>
+                                    <h3 className="font-semibold">{task.title}</h3>
+                                    <p className="text-sm text-gray-600">
+                                        Status: {task.status || "pending"}
+                                    </p>
+                                    {task.description && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {task.description}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="space-x-2">
+                                    <button
+                                        onClick={() => startEdit(task)}
+                                        className="text-blue-600"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button className="text-red-600">Delete</button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ))}
+
             </div>
             )}
         </div>
