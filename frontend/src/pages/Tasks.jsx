@@ -130,7 +130,9 @@ function Tasks() {
         method: "DELETE",
       });
 
-      setTasks((prev) => prev.filter((task) => task._id !== taskId));
+      setTasks((prev) =>
+        prev.filter((task) => task._id !== taskId)
+      );
     } catch (err) {
       setDeleteError(err.message);
     } finally {
@@ -153,34 +155,41 @@ function Tasks() {
 
   return (
     <div className="space-y-4">
+
       {/* Create Task */}
-      <form onSubmit={handleCreateTask} className="flex gap-2">
+      <form
+        onSubmit={handleCreateTask}
+        className="flex flex-col md:flex-row gap-2"
+      >
         <input
           type="text"
           placeholder="New task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="flex-1 border px-3 py-2 rounded"
+          className="w-full md:flex-1 border px-3 py-2 rounded"
         />
+
         <textarea
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="w-full md:flex-1 border px-3 py-2 rounded"
         />
+
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border px-3 py-2 rounded"
+          className="w-full md:w-40 border px-3 py-2 rounded"
         >
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
+
         <button
           type="submit"
           disabled={creating}
-          className={`px-4 py-2 rounded text-white ${
+          className={`w-full md:w-auto px-4 py-2 rounded text-white ${
             creating
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700"
@@ -193,7 +202,7 @@ function Tasks() {
       {createError && <p className="text-red-600">{createError}</p>}
 
       {/* Search & Filter */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           placeholder="Search tasks..."
@@ -201,6 +210,7 @@ function Tasks() {
           onChange={(e) => setSearchText(e.target.value)}
           className="flex-1 border px-3 py-2 rounded"
         />
+
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -236,6 +246,7 @@ function Tasks() {
                     }
                     className="border px-2 py-1 rounded w-full"
                   />
+
                   <textarea
                     value={editData.description}
                     onChange={(e) =>
@@ -246,6 +257,7 @@ function Tasks() {
                     }
                     className="border px-2 py-1 rounded w-full"
                   />
+
                   <select
                     value={editData.status}
                     onChange={(e) =>
@@ -282,7 +294,7 @@ function Tasks() {
                   </div>
                 </div>
               ) : (
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{task.title}</h3>
                     <p className="text-sm text-gray-600">
@@ -294,17 +306,18 @@ function Tasks() {
                       </p>
                     )}
                   </div>
-                  <div className="space-x-2">
+
+                  <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(task)}
-                      className="text-blue-600"
+                      className="text-blue-600 px-2 py-1"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteTask(task._id)}
                       disabled={deletingTaskId === task._id}
-                      className="text-red-600"
+                      className="text-red-600 px-2 py-1"
                     >
                       {deletingTaskId === task._id
                         ? "Deleting..."

@@ -10,14 +10,19 @@ function DashboardLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-
+      {/* Header always visible */}
       <Header />
 
-      <div className="flex flex-1">
+      {/* Content area */}
+      <div className="flex flex-1 flex-col md:flex-row">
+        
+        {/* Sidebar: hidden on mobile, visible on desktop */}
+        <div className="hidden md:block md:w-64 border-r">
+          <Sidebar />
+        </div>
 
-        <Sidebar />
-
-        <main className="flex-1 p-6 bg-white">
+        {/* Main content */}
+        <main className="flex-1 p-4 md:p-6 bg-white">
           <Outlet />
         </main>
 
