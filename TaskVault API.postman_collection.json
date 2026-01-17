@@ -1,7 +1,8 @@
 {
 	"info": {
 		"_postman_id": "5fc3d668-340d-4d13-afef-cd75563d9002",
-		"name": "TaskVault Auth API",
+		"name": "TaskVault API",
+		"description": "The collection includes:\n\n- User registration and login\n    \n- JWT-based authentication\n    \n- Protected task CRUD operations\n    \n- Error handling scenarios (invalid credentials, expired token)\n    \n\nTo test:\n\n1. Import the Postman collection\n    \n2. Run auth APIs to obtain JWT\n    \n3. Use the token to test protected task routes",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "31239186",
 		"_collection_link": "https://sigma-team-4220.postman.co/workspace/TaskVault~67cddede-0920-4cfc-9865-c6fddbc5d09a/collection/31239186-5fc3d668-340d-4d13-afef-cd75563d9002?action=share&source=collection_link&creator=31239186"
