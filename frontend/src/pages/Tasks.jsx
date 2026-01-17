@@ -23,6 +23,8 @@ function Tasks() {
     const [editError, setEditError] = useState(null);
     const [updating, setUpdating] = useState(false);
 
+    const [deletingTaskId, setDeletingTaskId] = useState(null);
+    const [deleteError, setDeleteError] = useState(null);
 
     const navigate = useNavigate();
 
@@ -181,6 +183,55 @@ function Tasks() {
         }
     };
 
+    const handleDeleteTask = async (taskId) => {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this task?"
+        );
+
+        if (!confirmed) return;
+
+        setDeletingTaskId(taskId);
+        setDeleteError(null);
+
+        try {
+            const token = getToken();
+            if (!token) {
+                clearToken();
+                navigate("/login");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:7000/tasks/${taskId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.status === 401) {
+                clearToken();
+                navigate("/login");
+                return;
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to delete task");
+            }
+
+            setTasks((prev) => prev.filter((task) => task._id !== taskId));
+        } catch (err) {
+            setDeleteError(err.message);
+        } finally {
+            setDeletingTaskId(null);
+        }
+    };
+
+
 
     if (loading) {
         return <p className="text-gray-600">Loading tasks...</p>;
@@ -239,6 +290,7 @@ function Tasks() {
             )}
 
             <h2 className="text-xl font-bold">Your Tasks</h2>
+            
 
             {tasks.length === 0 ? (
                 <p>No tasks yet. Create one!</p>
@@ -304,7 +356,6 @@ function Tasks() {
                                 </div>
                             </div>
                         ) : (
-                            /* 🔹 VIEW MODE */
                             <div className="flex justify-between">
                                 <div>
                                     <h3 className="font-semibold">{task.title}</h3>
@@ -325,7 +376,9 @@ function Tasks() {
                                     >
                                         Edit
                                     </button>
-                                    <button className="text-red-600">Delete</button>
+                                    <button onClick={() => handleDeleteTask(task._id)}
+                                        disabled={deletingTaskId === task._id} className="text-red-600">{deletingTaskId === task._id ? "Deleting..." : "Delete"}</button>
+
                                 </div>
                             </div>
                         )}
@@ -333,6 +386,9 @@ function Tasks() {
                 ))}
 
             </div>
+            )}
+            {deleteError && (
+                <p className="text-sm text-red-600">{deleteError}</p>
             )}
         </div>
     );
