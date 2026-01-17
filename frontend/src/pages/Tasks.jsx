@@ -26,6 +26,9 @@ function Tasks() {
     const [deletingTaskId, setDeletingTaskId] = useState(null);
     const [deleteError, setDeleteError] = useState(null);
 
+    const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -231,7 +234,14 @@ function Tasks() {
         }
     };
 
-
+    const filteredTasks = tasks
+        .filter((task) => {
+            if (statusFilter === "all") return true;
+            return task.status === statusFilter;
+        })
+        .filter((task) =>
+            task.title.toLowerCase().includes(searchText.toLowerCase())
+        );
 
     if (loading) {
         return <p className="text-gray-600">Loading tasks...</p>;
@@ -290,103 +300,138 @@ function Tasks() {
             )}
 
             <h2 className="text-xl font-bold">Your Tasks</h2>
-            
 
-            {tasks.length === 0 ? (
-                <p>No tasks yet. Create one!</p>
-            ) : (<div className="space-y-3">
-                {tasks.map((task) => (
-                    <div key={task._id} className="border p-4 rounded">
-                        {editingTaskId === task._id ? (
-                            /* 🔹 EDIT MODE */
-                            <div className="space-y-2">
-                                <input
-                                    value={editData.title}
-                                    onChange={(e) =>
-                                        setEditData((prev) => ({ ...prev, title: e.target.value }))
-                                    }
-                                    className="border px-2 py-1 rounded w-full"
-                                />
+            <div className="flex gap-3 mb-4">
+                <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="flex-1 border px-3 py-2 rounded"
+                />
 
-                                <textarea
-                                    value={editData.description}
-                                    onChange={(e) =>
-                                        setEditData((prev) => ({
-                                            ...prev,
-                                            description: e.target.value,
-                                        }))
-                                    }
-                                    className="border px-2 py-1 rounded w-full"
-                                />
-
-                                <select
-                                    value={editData.status}
-                                    onChange={(e) =>
-                                        setEditData((prev) => ({
-                                            ...prev,
-                                            status: e.target.value,
-                                        }))
-                                    }
-                                    className="border px-2 py-1 rounded w-full"
-                                >
-                                    <option value="pending">Pending</option>
-                                    <option value="in-progress">In Progress</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-
-                                {editError && (
-                                    <p className="text-sm text-red-600">{editError}</p>
-                                )}
-
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleUpdateTask(task._id)}
-                                        disabled={updating}
-                                        className="bg-green-600 text-white px-3 py-1 rounded"
-                                    >
-                                        {updating ? "Saving..." : "Save"}
-                                    </button>
-
-                                    <button
-                                        onClick={() => setEditingTaskId(null)}
-                                        className="text-gray-600"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex justify-between">
-                                <div>
-                                    <h3 className="font-semibold">{task.title}</h3>
-                                    <p className="text-sm text-gray-600">
-                                        Status: {task.status || "pending"}
-                                    </p>
-                                    {task.description && (
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            {task.description}
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="space-x-2">
-                                    <button
-                                        onClick={() => startEdit(task)}
-                                        className="text-blue-600"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button onClick={() => handleDeleteTask(task._id)}
-                                        disabled={deletingTaskId === task._id} className="text-red-600">{deletingTaskId === task._id ? "Deleting..." : "Delete"}</button>
-
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
-
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="border px-3 py-2 rounded"
+                >
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
             </div>
+
+            {filteredTasks.length === 0 ? (
+                <p className="text-gray-500">
+                    {tasks.length === 0
+                        ? "No tasks yet. Create one!"
+                        : "No tasks found."}
+                </p>
+            ) : (
+                <div className="space-y-3">
+                    {filteredTasks.map((task) => (
+                        <div key={task._id} className="border p-4 rounded">
+                            {editingTaskId === task._id ? (
+                                /* 🔹 EDIT MODE */
+                                <div className="space-y-2">
+                                    <input
+                                        value={editData.title}
+                                        onChange={(e) =>
+                                            setEditData((prev) => ({
+                                                ...prev,
+                                                title: e.target.value,
+                                            }))
+                                        }
+                                        className="border px-2 py-1 rounded w-full"
+                                    />
+
+                                    <textarea
+                                        value={editData.description}
+                                        onChange={(e) =>
+                                            setEditData((prev) => ({
+                                                ...prev,
+                                                description: e.target.value,
+                                            }))
+                                        }
+                                        className="border px-2 py-1 rounded w-full"
+                                    />
+
+                                    <select
+                                        value={editData.status}
+                                        onChange={(e) =>
+                                            setEditData((prev) => ({
+                                                ...prev,
+                                                status: e.target.value,
+                                            }))
+                                        }
+                                        className="border px-2 py-1 rounded w-full"
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="in-progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+
+                                    {editError && (
+                                        <p className="text-sm text-red-600">{editError}</p>
+                                    )}
+
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleUpdateTask(task._id)}
+                                            disabled={updating}
+                                            className="bg-green-600 text-white px-3 py-1 rounded"
+                                        >
+                                            {updating ? "Saving..." : "Save"}
+                                        </button>
+
+                                        <button
+                                            onClick={() => setEditingTaskId(null)}
+                                            className="text-gray-600"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                /* 🔹 VIEW MODE */
+                                <div className="flex justify-between">
+                                    <div>
+                                        <h3 className="font-semibold">{task.title}</h3>
+                                        <p className="text-sm text-gray-600">
+                                            Status: {task.status || "pending"}
+                                        </p>
+                                        {task.description && (
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                {task.description}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-x-2">
+                                        <button
+                                            onClick={() => startEdit(task)}
+                                            className="text-blue-600"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteTask(task._id)}
+                                            disabled={deletingTaskId === task._id}
+                                            className="text-red-600"
+                                        >
+                                            {deletingTaskId === task._id
+                                                ? "Deleting..."
+                                                : "Delete"}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             )}
+
             {deleteError && (
                 <p className="text-sm text-red-600">{deleteError}</p>
             )}
