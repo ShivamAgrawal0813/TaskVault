@@ -98,7 +98,7 @@ Steps to test:
 
 ---
 
-## How to Run Locally (High Level)
+## How to Run Locally
 
 1. Clone the repository
 2. Configure environment variables
